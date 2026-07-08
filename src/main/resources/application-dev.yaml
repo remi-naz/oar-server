@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  application:
+    name: oar-server
+    version: 0.1.0
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
