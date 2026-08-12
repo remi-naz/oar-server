@@ -1,6 +1,6 @@
 package dev.ridill.oar_server.user;
 
-import dev.ridill.oar_server.session.SessionRepository;
+import dev.ridill.oar_server.session.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,7 +14,17 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserKeyWrapRepository userKeyWrapRepository;
-    private final SessionRepository sessionRepository;
+    private final SessionService sessionService;
+
+    /**
+     * Finds the user by their Google {@code sub} claim, or provisions a new account
+     * on first sign-in.
+     */
+    @Transactional
+    public User findOrCreateByGoogleSignIn(String googleSubject, String email, String displayName, String photoUrl) {
+        return userRepository.findByGoogleSubjectAndDeletedAtIsNull(googleSubject)
+                .orElseGet(() -> userRepository.save(User.fromGoogleSignIn(googleSubject, email, displayName, photoUrl)));
+    }
 
     /**
      * Soft-deletes the user and hard-deletes their sealed key material and sessions.
@@ -30,7 +40,7 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException("No user with id " + userId));
 
         userKeyWrapRepository.deleteByUserId(userId);
-        sessionRepository.deleteByUserId(userId);
+        sessionService.deleteAllForUser(userId);
         user.anonymize();
     }
 }
