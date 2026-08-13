@@ -8,13 +8,15 @@ import java.util.UUID;
 
 interface SessionRepository extends JpaRepository<Session, UUID> {
 
-    Optional<Session> findByRefreshTokenHash(String refreshTokenHash);
+    Optional<Session> findByUserIdAndRefreshTokenHash(UUID userId, String refreshTokenHash);
 
     /** A hit here means an already-rotated-out token was presented again — revoke the session. */
     Optional<Session> findByPreviousRefreshTokenHash(String previousRefreshTokenHash);
 
     List<Session> findByUserIdAndRevokedAtIsNull(UUID userId);
 
-    /** Hard delete. Retained session/refresh-token material for a dead account is pure liability. */
-    long deleteByUserId(UUID userId);
+    /**
+     * Hard delete. Retained session/refresh-token material for a dead account is pure liability.
+     */
+    void deleteByUserId(UUID userId);
 }

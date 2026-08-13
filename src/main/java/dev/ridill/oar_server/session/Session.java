@@ -1,6 +1,5 @@
 package dev.ridill.oar_server.session;
 
-import dev.ridill.oar_server.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -27,9 +26,8 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @Column(name = "refresh_token_hash", nullable = false, unique = true)
     private String refreshTokenHash;
@@ -58,15 +56,15 @@ public class Session {
     @Column(name = "revoked_at")
     private Instant revokedAt;
 
-    private Session(User user, String refreshTokenHash, Instant expiresAt, String deviceLabel) {
-        this.user = user;
+    private Session(UUID userId, String refreshTokenHash, Instant expiresAt, String deviceLabel) {
+        this.userId = userId;
         this.refreshTokenHash = refreshTokenHash;
         this.expiresAt = expiresAt;
         this.deviceLabel = deviceLabel;
     }
 
-    public static Session create(User user, String refreshTokenHash, Instant expiresAt, String deviceLabel) {
-        return new Session(user, refreshTokenHash, expiresAt, deviceLabel);
+    public static Session create(UUID userId, String refreshTokenHash, Instant expiresAt, String deviceLabel) {
+        return new Session(userId, refreshTokenHash, expiresAt, deviceLabel);
     }
 
     /** Mutates this row in place: today's hash becomes the reuse-detection marker, replaced by the new one. */

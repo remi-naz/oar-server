@@ -1,4 +1,4 @@
-package dev.ridill.oar_server.auth;
+package dev.ridill.oar_server.security;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
@@ -35,11 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+        // Bearer <token>
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith(BEARER_PREFIX)) {
             String token = header.substring(BEARER_PREFIX.length());
             try {
-                UUID userId = jwtService.verifyAccessTokenAndGetUserId(token);
+                if (!jwtService.isAccessTokenValid(token)) throw new JwtException("Invalid token");
+
+                UUID userId = jwtService.getUserIdFromToken(token);
                 var authentication = new UsernamePasswordAuthenticationToken(userId, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException | IllegalArgumentException ignored) {

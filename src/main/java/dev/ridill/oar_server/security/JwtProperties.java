@@ -1,4 +1,4 @@
-package dev.ridill.oar_server.auth;
+package dev.ridill.oar_server.security;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
