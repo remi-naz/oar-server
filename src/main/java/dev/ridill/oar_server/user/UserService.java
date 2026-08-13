@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -15,6 +16,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserKeyWrapRepository userKeyWrapRepository;
     private final SessionService sessionService;
+
+    public Optional<User> findByUserId(UUID userId) {
+        return userRepository.findById(userId);
+    }
 
     /**
      * Finds the user by their Google {@code sub} claim, or provisions a new account
