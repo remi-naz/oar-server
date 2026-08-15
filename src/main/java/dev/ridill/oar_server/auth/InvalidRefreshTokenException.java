@@ -1,12 +1,15 @@
 package dev.ridill.oar_server.auth;
 
-public class InvalidRefreshTokenException extends RuntimeException {
+import dev.ridill.oar_server.common.exception.ApiException;
+import org.springframework.http.HttpStatus;
+
+public class InvalidRefreshTokenException extends ApiException {
 
     public InvalidRefreshTokenException() {
-        super("Refresh token is invalid or has already been used");
+        this("Refresh token is invalid or has already been used");
     }
 
     public InvalidRefreshTokenException(String message) {
-        super(message);
+        super(HttpStatus.UNAUTHORIZED, message);
     }
 }

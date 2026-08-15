@@ -7,12 +7,14 @@ import dev.ridill.oar_server.session.SessionService;
 import dev.ridill.oar_server.user.User;
 import dev.ridill.oar_server.user.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -38,6 +40,7 @@ public class AuthService {
         );
 
         AuthTokensDto tokens = issueTokens(user, deviceLabel);
+        log.info("User {} logged in", user.getId());
         return new LoginResponseDto(user.getDisplayName(), user.getPhotoUrl(), tokens.accessToken(), tokens.refreshToken());
     }
 
@@ -48,6 +51,7 @@ public class AuthService {
         Optional<Session> match = sessionService.findByRefreshTokenHash(presentedHash);
         if (match.isEmpty()) {
             // Rotated-out token presented again — theft signal. Revoke the whole session.
+            log.warn("Reuse of a rotated-out refresh token detected; revoking session");
             sessionService.revokeByPreviousRefreshTokenHash(presentedHash);
             throw new InvalidRefreshTokenException();
         }

@@ -18,6 +18,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+logging:
+  level:
+    dev.ridill.oar_server: DEBUG
+  structured:
+    format:
+      console: ""
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%X{requestId}] %logger{36} - %msg%n"
+
 app:
   jwt:
     secret: ${JWT_SECRET}
