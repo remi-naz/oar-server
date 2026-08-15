@@ -8,7 +8,7 @@ import java.util.UUID;
 
 interface SessionRepository extends JpaRepository<Session, UUID> {
 
-    Optional<Session> findByUserIdAndRefreshTokenHash(UUID userId, String refreshTokenHash);
+    Optional<Session> findByRefreshTokenHash(String refreshTokenHash);
 
     /** A hit here means an already-rotated-out token was presented again — revoke the session. */
     Optional<Session> findByPreviousRefreshTokenHash(String previousRefreshTokenHash);

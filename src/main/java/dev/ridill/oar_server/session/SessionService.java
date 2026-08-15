@@ -2,6 +2,8 @@ package dev.ridill.oar_server.session;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -13,16 +15,22 @@ public class SessionService {
 
     private final SessionRepository sessionRepository;
 
-    public Optional<Session> findByUserIdAndRefreshToken(UUID userId, String refreshTokenHash) {
-        return sessionRepository.findByUserIdAndRefreshTokenHash(userId, refreshTokenHash);
+    public Optional<Session> findByRefreshTokenHash(String refreshTokenHash) {
+        return sessionRepository.findByRefreshTokenHash(refreshTokenHash);
     }
 
     public Session create(UUID userId, String refreshTokenHash, Instant expiresAt, String deviceLabel) {
         return sessionRepository.save(Session.create(userId, refreshTokenHash, expiresAt, deviceLabel));
     }
 
-    public Optional<Session> findByPreviousRefreshTokenHash(String previousRefreshTokenHash) {
-        return sessionRepository.findByPreviousRefreshTokenHash(previousRefreshTokenHash);
+    /**
+     * Commits independently of the caller's transaction: the caller rejects the
+     * request by throwing, and a rollback would silently discard the revocation.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void revokeByPreviousRefreshTokenHash(String previousRefreshTokenHash) {
+        sessionRepository.findByPreviousRefreshTokenHash(previousRefreshTokenHash)
+                .ifPresent(Session::revoke);
     }
 
     /**

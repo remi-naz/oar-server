@@ -5,20 +5,18 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
 /**
- * Issues and verifies access-token JWTs. Refresh tokens are a separate, opaque
- * mechanism backed by {@link dev.ridill.oar_server.session.Session} — they are
- * never JWTs, since the server needs to be able to revoke/rotate them by hash.
+ * Issues and verifies access-token JWTs. Refresh tokens are opaque secure-random
+ * strings tracked by {@link dev.ridill.oar_server.session.Session} — never JWTs,
+ * since the server needs to revoke/rotate them by hash rather than by signature.
  */
 @Service
 @RequiredArgsConstructor
@@ -35,27 +33,14 @@ public class JwtService {
         this.secretKey = Keys.hmacShaKeyFor(decodedSecret);
     }
 
-    private String generateToken(
-            UUID userId,
-            Duration ttl,
-            String type
-    ) {
+    public String generateAccessToken(UUID userId) {
         Instant now = Instant.now();
         return Jwts.builder()
                 .subject(userId.toString())
-                .claim("type", type)
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plus(ttl)))
+                .expiration(Date.from(now.plus(jwtProperties.accessTokenTtl())))
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
-    }
-
-    public String generateAccessToken(UUID userId) {
-        return generateToken(userId, jwtProperties.accessTokenTtl(), "access_token");
-    }
-
-    public String generateRefreshToken(UUID userId) {
-        return generateToken(userId, jwtProperties.refreshTokenTtl(), "refresh_token");
     }
 
     private Claims parseClaims(String token) {
@@ -71,17 +56,7 @@ public class JwtService {
     }
 
     public Boolean isAccessTokenValid(String token) {
-        val claims = parseClaims(token);
-        if (claims == null) return false;
-
-        return claims.get("type").equals("access_token");
-    }
-
-    public Boolean isRefreshTokenValid(String token) {
-        val claims = parseClaims(token);
-        if (claims == null) return false;
-
-        return claims.get("type").equals("refresh_token");
+        return parseClaims(token) != null;
     }
 
     public UUID getUserIdFromToken(String token) {
