@@ -7,7 +7,7 @@ create table users
 (
     id            uuid primary key,
     google_subject text unique,
-    email         text unique,
+    email         text        not null unique,
     display_name  text        not null,
     photo_url     text,
     created_at    timestamptz not null,
