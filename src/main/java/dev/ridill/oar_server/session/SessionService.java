@@ -19,6 +19,11 @@ public class SessionService {
         return sessionRepository.findByRefreshTokenHash(refreshTokenHash);
     }
 
+    public void revokeByRefreshTokenHash(String refreshTokenHash) {
+        sessionRepository.findByRefreshTokenHash(refreshTokenHash)
+                .ifPresent(Session::revoke);
+    }
+
     public Session create(UUID userId, String refreshTokenHash, Instant expiresAt, String deviceLabel) {
         return sessionRepository.save(Session.create(userId, refreshTokenHash, expiresAt, deviceLabel));
     }

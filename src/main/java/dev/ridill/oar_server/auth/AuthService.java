@@ -65,6 +65,11 @@ public class AuthService {
         return new AuthTokensDto(newAccessToken, newRefreshToken);
     }
 
+    @Transactional
+    public void logout(String refreshToken) {
+        sessionService.revokeByRefreshTokenHash(tokenHasher.hash(refreshToken));
+    }
+
     private AuthTokensDto issueTokens(User user, String deviceLabel) {
         String accessToken = jwtService.generateAccessToken(user.getId());
         String rawRefreshToken = refreshTokenGenerator.generate();
