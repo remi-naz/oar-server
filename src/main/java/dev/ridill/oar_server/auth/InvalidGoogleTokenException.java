@@ -1,8 +1,11 @@
 package dev.ridill.oar_server.auth;
 
-public class InvalidGoogleTokenException extends RuntimeException {
+import dev.ridill.oar_server.common.exception.ApiException;
+import org.springframework.http.HttpStatus;
+
+public class InvalidGoogleTokenException extends ApiException {
 
     public InvalidGoogleTokenException() {
-        super("Google ID token is missing, expired, or failed verification");
+        super(HttpStatus.UNAUTHORIZED, "Google ID token is missing, expired, or failed verification");
     }
 }
