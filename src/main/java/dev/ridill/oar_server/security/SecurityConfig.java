@@ -25,7 +25,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/health", "/v1/auth/**").permitAll()
+                        .requestMatchers("/actuator/health/**", "/v1/auth/**").permitAll()
                         .dispatcherTypeMatchers(
                                 DispatcherType.ERROR,
                                 DispatcherType.FORWARD
